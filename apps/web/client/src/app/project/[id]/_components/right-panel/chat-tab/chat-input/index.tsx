@@ -28,6 +28,7 @@ import { type SuggestionsRef } from '../suggestions';
 import { ActionButtons } from './action-buttons';
 import { ChatContextWindow } from './chat-context';
 import { ChatModeToggle } from './chat-mode-toggle';
+import { PromptLibrary } from './prompt-library';
 import { QueueItems } from './queue-items';
 
 interface ChatInputProps {
@@ -452,6 +453,18 @@ export const ChatInput = observer(
                         <ActionButtons
                             handleImageEvent={handleImageEvent}
                             handleScreenshot={handleScreenshot}
+                        />
+                        <PromptLibrary
+                            onInsert={(content) => {
+                                setInputValue((prev) => {
+                                    if (!prev.trim()) {
+                                        return content;
+                                    }
+                                    const separator = prev.endsWith('\n') ? '' : '\n\n';
+                                    return prev + separator + content;
+                                });
+                                requestAnimationFrame(() => textareaRef.current?.focus());
+                            }}
                         />
                         {isSpeechSupported && (
                             <Tooltip>
