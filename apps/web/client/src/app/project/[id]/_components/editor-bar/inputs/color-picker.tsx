@@ -13,7 +13,14 @@ import { Separator } from '@onlook/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@onlook/ui/tabs';
 import { cn } from '@onlook/ui/utils';
 import { Color, toNormalCase, type Palette } from '@onlook/utility';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import {
+    generateHarmoniousPalette,
+    generateTailwindScale,
+    getContrastInfo,
+    getReadableTextColor,
+} from '@/utils/color-palette';
 import { useGradientUpdate } from '../hooks/use-gradient-update';
 import { HoverOnlyTooltip } from '../hover-tooltip';
 import { hasGradient } from '../utils/gradient';
@@ -96,6 +103,7 @@ enum TabValue {
     BRAND = 'brand',
     CUSTOM = 'custom',
     GRADIENT = 'gradient',
+    PALETTE = 'palette',
 }
 
 interface ColorPickerProps {
@@ -642,6 +650,12 @@ export const ColorPickerContent: React.FC<ColorPickerProps> = ({
                                     Gradient
                                 </TabsTrigger>
                             )}
+                            <TabsTrigger
+                                value={TabValue.PALETTE}
+                                className="flex items-center justify-center px-1.5 py-1 text-xs rounded-md bg-transparent hover:bg-background-secondary hover:text-foreground-primary transition-colors"
+                            >
+                                Palette
+                            </TabsTrigger>
                         </div>
                         {!isCreatingNewColor && (
                             <HoverOnlyTooltip
@@ -789,7 +803,107 @@ export const ColorPickerContent: React.FC<ColorPickerProps> = ({
                         </div>
                     </TabsContent>
                 )}
+
+                <TabsContent value={TabValue.PALETTE} className="p-0 m-0">
+                    <PaletteGenerator color={color} onColorSelect={(hex) => {
+                        const newColor = Color.from(hex);
+                        onChangeEnd(newColor);
+                    }} />
+                </TabsContent>
             </Tabs>
+        </div>
+    );
+};
+
+type HarmonyType = 'analogous' | 'complementary' | 'triadic' | 'split-complementary';
+
+const PaletteGenerator = ({
+    color,
+    onColorSelect,
+}: {
+    color: Color;
+    onColorSelect: (hex: string) => void;
+}) => {
+    const [harmonyType, setHarmonyType] = useState<HarmonyType>('analogous');
+    const hex = color.toHex6();
+
+    const tailwindScale = useMemo(() => generateTailwindScale(hex), [hex]);
+    const harmonyColors = useMemo(
+        () => generateHarmoniousPalette(hex, harmonyType),
+        [hex, harmonyType],
+    );
+    const contrast = useMemo(() => getContrastInfo(hex), [hex]);
+
+    const harmonyTypes: HarmonyType[] = ['analogous', 'complementary', 'triadic', 'split-complementary'];
+
+    return (
+        <div className="flex flex-col gap-2 p-2">
+            <div className="flex items-center gap-2 px-1">
+                <div className="w-6 h-6 rounded border" style={{ backgroundColor: hex }} />
+                <div className="flex-1 text-xs text-foreground-secondary">
+                    <span>
+                        {contrast.aaNormal ? 'AA \u2713' : 'AA \u2717'}{' '}
+                        {contrast.aaaNormal ? 'AAA \u2713' : 'AAA \u2717'}
+                    </span>
+                    <span className="ml-2 text-foreground-tertiary">
+                        {contrast.onWhite}:1 on white
+                    </span>
+                </div>
+            </div>
+            <Separator />
+            <div className="px-1">
+                <span className="text-xs text-foreground-secondary">Tailwind Scale</span>
+                <div className="flex gap-0.5 mt-1">
+                    {Object.entries(tailwindScale).map(([shade, shadeHex]) => (
+                        <button
+                            key={shade}
+                            className="flex-1 h-6 rounded-sm hover:ring-1 hover:ring-foreground-primary transition-all cursor-pointer"
+                            style={{ backgroundColor: shadeHex }}
+                            onClick={() => onColorSelect(shadeHex)}
+                            title={`${shade}: ${shadeHex}`}
+                        />
+                    ))}
+                </div>
+                <div className="flex justify-between mt-0.5">
+                    <span className="text-[9px] text-foreground-tertiary">50</span>
+                    <span className="text-[9px] text-foreground-tertiary">950</span>
+                </div>
+            </div>
+            <Separator />
+            <div className="px-1">
+                <div className="flex items-center justify-between">
+                    <span className="text-xs text-foreground-secondary">Harmony</span>
+                    <select
+                        className="text-[10px] bg-background-secondary border-none rounded px-1 py-0.5 text-foreground-secondary"
+                        value={harmonyType}
+                        onChange={(e) => setHarmonyType(e.target.value as HarmonyType)}
+                    >
+                        {harmonyTypes.map((t) => (
+                            <option key={t} value={t}>
+                                {t}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex gap-1 mt-1">
+                    {harmonyColors.map((harmHex, i) => (
+                        <button
+                            key={i}
+                            className="flex-1 h-8 rounded hover:ring-1 hover:ring-foreground-primary transition-all cursor-pointer flex items-center justify-center"
+                            style={{
+                                backgroundColor: harmHex,
+                                color: getReadableTextColor(harmHex),
+                            }}
+                            onClick={() => onColorSelect(harmHex)}
+                            title={harmHex}
+                        >
+                            <span className="text-[9px] font-mono">
+                                {harmHex.replace('#', '').toUpperCase()}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };

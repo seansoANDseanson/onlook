@@ -6,6 +6,7 @@ import stripAnsi from 'strip-ansi';
 import { type z } from 'zod';
 import { BashCodeDisplay } from '../../code-display/bash-code-display';
 import { CollapsibleCodeBlock } from '../../code-display/collapsible-code-block';
+import { CollapsibleDiffBlock } from '../../code-display/collapsible-diff-block';
 import { SearchSourcesDisplay } from '../../code-display/search-sources-display';
 import { ToolCallSimple } from './tool-call-simple';
 
@@ -123,9 +124,10 @@ const ToolCallDisplayComponent = ({
     if (toolName === SearchReplaceEditTool.toolName) {
         const args = toolPart.input as z.infer<typeof SearchReplaceEditTool.parameters> | null;
         const filePath = args?.file_path;
-        const codeContent = args?.new_string;
+        const oldContent = args?.old_string;
+        const newContent = args?.new_string;
         const branchId = args?.branchId;
-        if (!filePath || !codeContent) {
+        if (!filePath || !newContent) {
             return (
                 <ToolCallSimple
                     toolPart={toolPart}
@@ -133,10 +135,23 @@ const ToolCallDisplayComponent = ({
                 />
             );
         }
+        if (oldContent) {
+            return (
+                <CollapsibleDiffBlock
+                    path={filePath}
+                    oldContent={oldContent}
+                    newContent={newContent}
+                    messageId={messageId}
+                    applied={applied}
+                    isStream={isStream}
+                    branchId={branchId}
+                />
+            );
+        }
         return (
             <CollapsibleCodeBlock
                 path={filePath}
-                content={codeContent}
+                content={newContent}
                 messageId={messageId}
                 applied={applied}
                 isStream={isStream}
@@ -148,9 +163,9 @@ const ToolCallDisplayComponent = ({
     if (toolName === SearchReplaceMultiEditFileTool.toolName) {
         const args = toolPart.input as z.infer<typeof SearchReplaceMultiEditFileTool.parameters> | null;
         const filePath = args?.file_path;
-        const codeContent = args?.edits?.map((edit) => edit.new_string).join('\n...\n');
+        const edits = args?.edits;
         const branchId = args?.branchId;
-        if (!filePath || !codeContent) {
+        if (!filePath || !edits || edits.length === 0) {
             return (
                 <ToolCallSimple
                     toolPart={toolPart}
@@ -158,10 +173,13 @@ const ToolCallDisplayComponent = ({
                 />
             );
         }
+        const oldContent = edits.map((edit) => edit.old_string).join('\n...\n');
+        const newContent = edits.map((edit) => edit.new_string).join('\n...\n');
         return (
-            <CollapsibleCodeBlock
+            <CollapsibleDiffBlock
                 path={filePath}
-                content={codeContent}
+                oldContent={oldContent}
+                newContent={newContent}
                 messageId={messageId}
                 applied={applied}
                 isStream={isStream}
