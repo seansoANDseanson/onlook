@@ -29,7 +29,11 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "preview-storybook": "bun --bun x serve storybook-static -p 6007",
-    "chromatic": "chromatic --exit-zero-on-changes"
+    "chromatic": "chromatic --exit-zero-on-changes",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:types": "wrangler types"
   },
   "dependencies": {
     "@ai-sdk/provider-utils": "^3.0.10",
@@ -137,6 +141,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@onlook/eslint": "*",
     "@onlook/typescript": "*",
+    "@opennextjs/cloudflare": "^1.19.1",
     "@storybook/addon-a11y": "^10.0.4",
     "@storybook/addon-actions": "^9.0.8",
     "@storybook/addon-docs": "^10.0.4",
@@ -163,7 +168,8 @@
     "tailwindcss": "^4.0.15",
     "type-fest": "^4.41.0",
     "typescript": "^5.5.4",
-    "vitest": "^4.0.7"
+    "vitest": "^4.0.7",
+    "wrangler": "^4.83.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.39.2"

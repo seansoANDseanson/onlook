@@ -1,0 +1,73 @@
+/**
+ * Cloudflare Workers deployment config for Onlook's Next.js web client.
+ *
+ * Deployed separately from the existing `openctrl` Worker on the account.
+ * Rename `name` below if you want to replace an existing Worker.
+ *
+ * See: https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "onlook-app",
+    "main": ".open-next/worker.js",
+    "compatibility_date": "2025-03-25",
+    "compatibility_flags": [
+        // Required for Next.js server runtime
+        "nodejs_compat",
+        // Enables global `fetch` to follow redirects the way Node does
+        "global_fetch_strictly_public"
+    ],
+
+    // Static assets bundled by OpenNext's build
+    "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS"
+    },
+
+    // Observability — keeps the dashboard's log tail working
+    "observability": {
+        "enabled": true
+    },
+
+    // --- Optional bindings — enable what you actually use ---
+
+    // KV for Next.js ISR cache. Create via:
+    //   wrangler kv namespace create ONLOOK_CACHE
+    // Then paste the returned id here:
+    // "kv_namespaces": [
+    //     {
+    //         "binding": "NEXT_CACHE_WORKERS_KV",
+    //         "id": "<your-kv-id>"
+    //     }
+    // ],
+
+    // Hyperdrive is required if you call Supabase Postgres from server
+    // routes (tRPC, server actions). Create via:
+    //   wrangler hyperdrive create onlook-supabase \
+    //     --connection-string="$SUPABASE_DATABASE_URL"
+    // Then paste the returned id here:
+    // "hyperdrive": [
+    //     {
+    //         "binding": "HYPERDRIVE",
+    //         "id": "<your-hyperdrive-id>"
+    //     }
+    // ],
+
+    // R2 for uploaded images / assets, if you switch away from the
+    // existing CSB/Freestyle hosting:
+    // "r2_buckets": [
+    //     {
+    //         "binding": "ASSETS_BUCKET",
+    //         "bucket_name": "onlook-assets"
+    //     }
+    // ],
+
+    // --- Environment variables ---
+    // DO NOT put secrets here. Use `wrangler secret put <NAME>` for:
+    //   SUPABASE_SERVICE_ROLE_KEY, OPENROUTER_API_KEY, CSB_API_KEY,
+    //   ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, etc.
+    // Public/non-secret values can live here:
+    "vars": {
+        "NEXT_PUBLIC_SITE_URL": "https://onlook-app.workers.dev"
+    }
+}
