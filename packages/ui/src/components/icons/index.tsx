@@ -3664,4 +3664,57 @@ export const Icons = {
             <path d="M10.2486 2.375V5.375C10.2486 6.20343 10.9201 6.875 11.7486 6.875H14.7486M4.24609 7.4375L4.24859 3.5C4.24859 2.67157 4.92017 2 5.74859 2H9.62729C10.0251 2 10.4066 2.15803 10.6879 2.43934L14.6842 6.43566C14.9656 6.71697 15.1236 7.09849 15.1236 7.4963V14.375C15.1236 15.2034 14.452 15.875 13.6236 15.875H10.6548H8.7475M4.25 10.625V12.875M4.25 12.875V15.125M4.25 12.875H2M4.25 12.875H6.5" />
         </svg>
     ),
+    Mic: ({ className, ...props }: IconProps) => (
+        <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={className}
+            {...props}
+        >
+            <path
+                d="M12 1C10.3431 1 9 2.34315 9 4V12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12V4C15 2.34315 13.6569 1 12 1Z"
+                fill="currentColor"
+            />
+            <path
+                d="M6 10V12C6 15.3137 8.68629 18 12 18C15.3137 18 18 15.3137 18 12V10"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+            />
+            <path d="M12 18V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    ),
+    MicOff: ({ className, ...props }: IconProps) => (
+        <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={className}
+            {...props}
+        >
+            <path
+                d="M9 4C9 2.34315 10.3431 1 12 1C13.6569 1 15 2.34315 15 4V9.17L9 3.17V4Z"
+                fill="currentColor"
+            />
+            <path
+                d="M15 12V11L9.65 5.65L9 5V12C9 13.6569 10.3431 15 12 15C12.79 15 13.5 14.68 14.02 14.16"
+                fill="currentColor"
+            />
+            <path
+                d="M18 12V10M6 10V12C6 15.3137 8.68629 18 12 18C13.39 18 14.68 17.56 15.73 16.82"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+            />
+            <path d="M12 18V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M3 3L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    ),
 } satisfies { [key: string]: React.FC<IconProps> };

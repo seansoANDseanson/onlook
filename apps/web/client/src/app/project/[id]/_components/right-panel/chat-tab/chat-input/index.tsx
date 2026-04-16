@@ -20,6 +20,7 @@ import { compressImageInBrowser, convertToBase64DataUrl } from '@onlook/utility'
 import type { SendMessage } from '@/app/project/[id]/_hooks/use-chat';
 import { useEditorEngine } from '@/components/store/editor';
 import { FOCUS_CHAT_INPUT_EVENT } from '@/components/store/editor/chat';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { transKeys } from '@/i18n/keys';
 import { validateImageLimit } from '../context-pills/helpers';
 import { InputContextPills } from '../context-pills/input-context-pills';
@@ -62,6 +63,14 @@ export const ChatInput = observer(
         const [isDragging, setIsDragging] = useState(false);
         const chatMode = editorEngine.state.chatMode;
         const [inputValue, setInputValue] = useState('');
+        const { isListening, isSupported: isSpeechSupported, toggleListening } = useSpeechRecognition({
+            onTranscript: (text) => {
+                setInputValue((prev) => {
+                    const separator = prev.length > 0 && !prev.endsWith(' ') ? ' ' : '';
+                    return prev + separator + text;
+                });
+            },
+        });
         const lastUsageMessage = useMemo(
             () => messages.findLast((msg) => msg.metadata?.usage),
             [messages],
@@ -444,6 +453,32 @@ export const ChatInput = observer(
                             handleImageEvent={handleImageEvent}
                             handleScreenshot={handleScreenshot}
                         />
+                        {isSpeechSupported && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant={'ghost'}
+                                        size={'icon'}
+                                        className={cn(
+                                            'w-9 h-9 group cursor-pointer hover:bg-transparent',
+                                            isListening
+                                                ? 'text-red-500 animate-pulse'
+                                                : 'text-foreground-tertiary',
+                                        )}
+                                        onClick={toggleListening}
+                                    >
+                                        {isListening ? (
+                                            <Icons.MicOff className="w-5 h-5" />
+                                        ) : (
+                                            <Icons.Mic className="w-5 h-5 group-hover:text-foreground" />
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" sideOffset={6} hideArrow>
+                                    {isListening ? 'Stop listening' : 'Voice input'}
+                                </TooltipContent>
+                            </Tooltip>
+                        )}
                         {isStreaming && inputEmpty ? (
                             <Tooltip open={actionTooltipOpen} onOpenChange={setActionTooltipOpen}>
                                 <TooltipTrigger asChild>
